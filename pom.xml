@@ -12,6 +12,7 @@
     <modules>
         <module>server</module>
         <module>engineering-robot</module>
+        <module>common</module>
     </modules>
 
     <properties>
@@ -21,6 +22,7 @@
 
         <spring.version>5.1.9.RELEASE</spring.version>
         <spring.boot.version>2.1.8.RELEASE</spring.boot.version>
+        <chromedriver.version>3.141.59</chromedriver.version>
     </properties>
 
     <dependencyManagement>
@@ -40,6 +42,13 @@
                 <artifactId>spring-boot-starter-web</artifactId>
                 <version>${spring.boot.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-java</artifactId>
+                <version>${chromedriver.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

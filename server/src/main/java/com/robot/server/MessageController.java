@@ -11,17 +11,16 @@ public class MessageController {
 
     private Logger logger = LogManager.getLogger(MessageController.class);
 
-
-    @MessageMapping("/robot")
-    @SendTo("/receive/robot")
+    @MessageMapping("/signaling/robot")
+    @SendTo("/browser/robot")
     public String sendToRobot(String message) {
         logger.info("Message time: " + System.currentTimeMillis());
         logger.info("Signaling received from operator: " + message);
         return message;
     }
 
-    @MessageMapping("/operator")
-    @SendTo("/receive/operator")
+    @MessageMapping("/signaling/operator")
+    @SendTo("/browser/operator")
     public String sendToOperator(String message) {
         logger.info("Message time: " + System.currentTimeMillis());
         logger.info("Signaling received from robot: " + message);

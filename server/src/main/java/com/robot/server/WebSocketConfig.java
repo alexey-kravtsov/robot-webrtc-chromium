@@ -12,13 +12,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/receive");
+        config.enableSimpleBroker("/browser");
         config.setApplicationDestinationPrefixes("/");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/websocket-endpoint").withSockJS();
+        registry
+                .addEndpoint("/signaling-endpoint")
+                .setAllowedOrigins("*")
+                .withSockJS();
     }
 
 

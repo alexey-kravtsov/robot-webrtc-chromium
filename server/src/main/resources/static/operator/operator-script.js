@@ -1,92 +1,38 @@
-const rtcConfiguration = {
-    iceServers: [
-        {urls: "stun:stun.services.mozilla.com"},
-        {urls: "stun:stun.l.google.com:19302"}
-    ]
-};
+let operatorConnector = null;
+let movementController = null;
 
-let stompClient = null;
-let peerConnection = null;
+connectSignaling();
+setupKeyListener();
 
-const offerOptions = {
-    offerToReceiveAudio: false,
-    offerToReceiveVideo: true
-};
-
-connect();
-
-function connect() {
-    let socket = new SockJS('/websocket-endpoint');
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, async function (frame) {
-        console.log('Connected: ' + frame);
-        stompClient.subscribe('/receive/operator', processMessage);
-    });
+function connectSignaling() {
+    operatorConnector = new OperatorConnector(onChannelOpen, onChannelClose, onRemoteTrack, processCommand);
+    operatorConnector.connect();
+    movementController = new MovementController(operatorConnector);
 }
 
-function getOrCreatePeerConnection() {
-    if (peerConnection == null) {
-        peerConnection = new RTCPeerConnection(rtcConfiguration);
-        peerConnection.addEventListener('icecandidate', onIceCandidate);
-        peerConnection.addEventListener('track', onRemoteTrack);
-    }
-
-    return peerConnection;
+function setupKeyListener() {
+    document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener('keyup', handleKeyRelease);
 }
 
-function closePeerConnection() {
-    peerConnection.close();
-    peerConnection = null;
+function handleKeyPress(event) {
+    movementController.keyPress(event.code);
+}
+
+function handleKeyRelease(event) {
+    movementController.keyRelease(event.code);
 }
 
 async function start() {
-    peerConnection = getOrCreatePeerConnection();
-
-    const offer = await peerConnection.createOffer(offerOptions);
-    await peerConnection.setLocalDescription(offer);
-    send('MEDIA', offer);
+    await operatorConnector.startWebrtcConnector();
 }
 
 function stop() {
-    peerConnection.close();
-    peerConnection = null;
-    send('STOP', '');
+    operatorConnector.stopWebrtcConnector();
 }
 
-async function processMessage(data) {
-    let m = JSON.parse(data.body);
-    switch (m.type) {
-        case "MEDIA": {
-            const answer = JSON.parse(m.message);
-            const desc = new RTCSessionDescription(answer);
-            const peerConnection = getOrCreatePeerConnection();
-            await peerConnection.setRemoteDescription(desc);
-            break;
-        }
-        case "ICE": {
-            const ice = JSON.parse(m.message);
-            const candidate = new RTCIceCandidate(ice);
-            const peerConnection = getOrCreatePeerConnection();
-            await peerConnection.addIceCandidate(candidate);
-            break;
-        }
-    }
-}
-
-function send(type, message) {
-    stompClient.send("/robot", {}, JSON.stringify({
-        type: type,
-        message: JSON.stringify(message)
-    }));
-}
-
-function onIceCandidate(event) {
-    if (event.candidate == null) {
-        console.log("ICE Candidate was null, done");
-        return;
-    }
-
-    send("ICE", event.candidate);
+function processCommand(event) {
+    console.log(event);
 }
 
 function onRemoteTrack(event) {
@@ -96,4 +42,12 @@ function onRemoteTrack(event) {
         console.log('Incoming stream');
         $videoElement.srcObject = stream;
     }
+}
+
+function onChannelOpen(event) {
+    console.log("Channel open");
+}
+
+function onChannelClose(event) {
+    console.log("Channel close")
 }
