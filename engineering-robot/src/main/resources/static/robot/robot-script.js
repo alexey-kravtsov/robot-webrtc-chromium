@@ -1,8 +1,6 @@
 let robotConnector = null;
 
-function connect() {
+function connect(address, port) {
     robotConnector = new RobotConnector();
-    robotConnector.connect();
+    robotConnector.connect(address, port);
 }
-
-connect();

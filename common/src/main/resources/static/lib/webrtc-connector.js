@@ -51,7 +51,14 @@ class WebrtcConnector {
         const peerConnection = this._getOrCreatePeerConnection();
         peerConnection.addEventListener('datachannel', this._handleDataChannel.bind(this));
         await peerConnection.setRemoteDescription(desc);
-        const localStream = await navigator.mediaDevices.getUserMedia({audio: false, video: true});
+        const localStream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: {
+                width: {min: 640, max: 640},
+                height: {min: 480, max: 480},
+                frameRate: {min: 30, max: 30}
+            }
+        });
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
         const answer = await peerConnection.createAnswer();

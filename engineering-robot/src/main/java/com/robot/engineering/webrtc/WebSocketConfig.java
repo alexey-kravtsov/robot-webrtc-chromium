@@ -1,4 +1,4 @@
-package com.robot.engineering;
+package com.robot.engineering.webrtc;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

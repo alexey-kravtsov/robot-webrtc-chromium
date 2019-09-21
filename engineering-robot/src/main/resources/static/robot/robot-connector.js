@@ -9,7 +9,7 @@ class RobotConnector {
         this._webrtcConnector.onCommand = this._processCommand.bind(this);
     }
 
-    connect() {
+    connect(address, port) {
         const robotSocket = new SockJS("/robot-internal-endpoint");
         const robotClient = Stomp.over(robotSocket);
         this._robotClient = robotClient;
@@ -17,7 +17,8 @@ class RobotConnector {
             robotClient.subscribe('/browser/robot', this._processRobotMessage.bind(this))
         }.bind(this));
 
-        const signalingSocket = new SockJS('http://localhost:8080/signaling-endpoint');
+        const signalingEndpoint = encodeURI(`http://${address}:${port}/signaling-endpoint`);
+        const signalingSocket = new SockJS(signalingEndpoint);
         const signalingClient = Stomp.over(signalingSocket);
         this._signalingClient = signalingClient;
         signalingClient.connect({}, function (frame) {
